@@ -29,7 +29,8 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
     private val adapterFeed = FeedAdapter()
 
     private val observerImages = Observer<List<Image>> {
-        adapterFeed.update(it)
+        adapterFeed.submitList(null)
+        adapterFeed.submitList(it)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -37,7 +38,6 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         binding = FeedFragmentBinding.bind(view)
         viewModel = ViewModelProvider(this).get(FeedViewModel::class.java)
         viewModel.images.observe(viewLifecycleOwner, observerImages)
-
 
         setupRecyclerView()
 
