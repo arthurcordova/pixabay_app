@@ -15,28 +15,31 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arcanesecurity.pixabayapp.R
 import com.arcanesecurity.pixabayapp.adapter.AdsAdapter
 import com.arcanesecurity.pixabayapp.adapter.FeedAdapter
+import com.arcanesecurity.pixabayapp.adapter.FeedVideoAdapter
 import com.arcanesecurity.pixabayapp.adapter.HeaderAdapter
 import com.arcanesecurity.pixabayapp.databinding.FeedFragmentBinding
 import com.arcanesecurity.pixabayapp.model.Image
+import com.arcanesecurity.pixabayapp.model.VideoConfig
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class FeedFragment : Fragment(R.layout.feed_fragment) {
-
-    companion object {
-        fun newInstance() = FeedFragment()
-    }
+class FeedFragment(private val feedType: FeedType) : Fragment(R.layout.feed_fragment) {
 
     private lateinit var viewModel: FeedViewModel
     private lateinit var binding: FeedFragmentBinding
     lateinit var adapters: ConcatAdapter
     private val adapterFeed = FeedAdapter()
-    private val adapterHeader = HeaderAdapter {
-        viewModel.fetchImages(it)
-    }
+    private val adapterVideo = FeedVideoAdapter()
+//    private val adapterHeader = HeaderAdapter {
+//        viewModel.fetchImages(it)
+//    }
 
     private val observerImages = Observer<List<Image>> {
         adapterFeed.submitList(it)
+    }
+
+    private val observerVideos = Observer<List<VideoConfig>> {
+        adapterVideo.submitList(it)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -44,8 +47,9 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         binding = FeedFragmentBinding.bind(view)
         viewModel = ViewModelProvider(this).get(FeedViewModel::class.java)
         viewModel.images.observe(viewLifecycleOwner, observerImages)
+        viewModel.videos.observe(viewLifecycleOwner, observerVideos)
 
-        adapters = ConcatAdapter(AdsAdapter(), adapterHeader, adapterFeed)
+        adapters = if (feedType == FeedType.VIDEO) ConcatAdapter(adapterVideo) else ConcatAdapter(adapterFeed)
         setupRecyclerView()
     }
 
@@ -59,10 +63,13 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
             }
         })
 
-        viewModel.fetchImages()
+        if (feedType == FeedType.VIDEO) viewModel.fetchVideo() else viewModel.fetchImages()
     }
+}
 
-
+enum class FeedType{
+    VIDEO,
+    IMAGE
 }
 
 fun View.hideSoftInput() {
