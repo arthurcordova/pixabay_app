@@ -12,6 +12,7 @@ data class PixabayImage(
 data class Image(
     val id: Int,
     val tags: String,
+    val likes: Int,
     val previewURL: String,
     val largeImageURL: String,
     val fullHDURL: String,

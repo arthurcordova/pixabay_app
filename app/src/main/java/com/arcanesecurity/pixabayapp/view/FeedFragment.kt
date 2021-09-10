@@ -21,6 +21,7 @@ import com.arcanesecurity.pixabayapp.databinding.FeedFragmentBinding
 import com.arcanesecurity.pixabayapp.model.Image
 import com.arcanesecurity.pixabayapp.model.VideoConfig
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class FeedFragment(private val feedType: FeedType) : Fragment(R.layout.feed_fragment) {
@@ -31,7 +32,8 @@ class FeedFragment(private val feedType: FeedType) : Fragment(R.layout.feed_frag
     private val adapterFeed = FeedAdapter()
     private val adapterVideo = FeedVideoAdapter()
     private val adapterHeader = HeaderAdapter {
-        viewModel.fetchImages(it)
+        if (feedType == FeedType.VIDEO) viewModel.fetchVideo(it) else viewModel.fetchImages(it)
+
     }
 
     private val observerImages = Observer<List<Image>> {
@@ -49,7 +51,7 @@ class FeedFragment(private val feedType: FeedType) : Fragment(R.layout.feed_frag
         viewModel.images.observe(viewLifecycleOwner, observerImages)
         viewModel.videos.observe(viewLifecycleOwner, observerVideos)
 
-        adapters = if (feedType == FeedType.VIDEO) ConcatAdapter(adapterVideo) else ConcatAdapter(adapterHeader, adapterFeed)
+        adapters = if (feedType == FeedType.VIDEO) ConcatAdapter(adapterHeader, adapterVideo) else ConcatAdapter(adapterHeader, adapterFeed)
         setupRecyclerView()
     }
 
