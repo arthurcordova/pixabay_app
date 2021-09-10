@@ -30,9 +30,9 @@ class FeedFragment(private val feedType: FeedType) : Fragment(R.layout.feed_frag
     lateinit var adapters: ConcatAdapter
     private val adapterFeed = FeedAdapter()
     private val adapterVideo = FeedVideoAdapter()
-//    private val adapterHeader = HeaderAdapter {
-//        viewModel.fetchImages(it)
-//    }
+    private val adapterHeader = HeaderAdapter {
+        viewModel.fetchImages(it)
+    }
 
     private val observerImages = Observer<List<Image>> {
         adapterFeed.submitList(it)
@@ -49,7 +49,7 @@ class FeedFragment(private val feedType: FeedType) : Fragment(R.layout.feed_frag
         viewModel.images.observe(viewLifecycleOwner, observerImages)
         viewModel.videos.observe(viewLifecycleOwner, observerVideos)
 
-        adapters = if (feedType == FeedType.VIDEO) ConcatAdapter(adapterVideo) else ConcatAdapter(adapterFeed)
+        adapters = if (feedType == FeedType.VIDEO) ConcatAdapter(adapterVideo) else ConcatAdapter(adapterHeader, adapterFeed)
         setupRecyclerView()
     }
 
