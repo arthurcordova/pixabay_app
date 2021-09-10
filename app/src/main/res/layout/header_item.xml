@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".view.FeedFragment">
+    android:layout_height="wrap_content">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewFeed"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+    <EditText
+        android:id="@+id/ediTextSearchOnHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Type for search an image"
+        android:padding="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
