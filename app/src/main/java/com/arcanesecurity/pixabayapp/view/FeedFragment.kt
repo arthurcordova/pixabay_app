@@ -9,27 +9,37 @@ import androidx.fragment.app.Fragment
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arcanesecurity.pixabayapp.R
+import com.arcanesecurity.pixabayapp.adapter.AdsAdapter
 import com.arcanesecurity.pixabayapp.adapter.FeedAdapter
+import com.arcanesecurity.pixabayapp.adapter.FeedVideoAdapter
+import com.arcanesecurity.pixabayapp.adapter.HeaderAdapter
 import com.arcanesecurity.pixabayapp.databinding.FeedFragmentBinding
 import com.arcanesecurity.pixabayapp.model.Image
+import com.arcanesecurity.pixabayapp.model.VideoConfig
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class FeedFragment : Fragment(R.layout.feed_fragment) {
-
-    companion object {
-        fun newInstance() = FeedFragment()
-    }
+class FeedFragment(private val feedType: FeedType) : Fragment(R.layout.feed_fragment) {
 
     private lateinit var viewModel: FeedViewModel
     private lateinit var binding: FeedFragmentBinding
+    lateinit var adapters: ConcatAdapter
     private val adapterFeed = FeedAdapter()
+    private val adapterVideo = FeedVideoAdapter()
+//    private val adapterHeader = HeaderAdapter {
+//        viewModel.fetchImages(it)
+//    }
 
     private val observerImages = Observer<List<Image>> {
-        adapterFeed.update(it)
+        adapterFeed.submitList(it)
+    }
+
+    private val observerVideos = Observer<List<VideoConfig>> {
+        adapterVideo.submitList(it)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -37,32 +47,14 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
         binding = FeedFragmentBinding.bind(view)
         viewModel = ViewModelProvider(this).get(FeedViewModel::class.java)
         viewModel.images.observe(viewLifecycleOwner, observerImages)
+        viewModel.videos.observe(viewLifecycleOwner, observerVideos)
 
-
+        adapters = if (feedType == FeedType.VIDEO) ConcatAdapter(adapterVideo) else ConcatAdapter(adapterFeed)
         setupRecyclerView()
-
-        binding.ediTextSearch.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                p0?.let {
-                    if (it.length > 2) {
-                        viewModel.fetchImages(it.toString())
-                    }
-                }
-            }
-
-            override fun afterTextChanged(p0: Editable?) {
-
-            }
-        })
-
     }
 
-
     private fun setupRecyclerView() = with(binding.recyclerViewFeed) {
-        adapter = adapterFeed
+        adapter = adapters
         layoutManager = LinearLayoutManager(requireContext())
         addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -71,10 +63,13 @@ class FeedFragment : Fragment(R.layout.feed_fragment) {
             }
         })
 
-        viewModel.fetchImages()
+        if (feedType == FeedType.VIDEO) viewModel.fetchVideo() else viewModel.fetchImages()
     }
+}
 
-
+enum class FeedType{
+    VIDEO,
+    IMAGE
 }
 
 fun View.hideSoftInput() {

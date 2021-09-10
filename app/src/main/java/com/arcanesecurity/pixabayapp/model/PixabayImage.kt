@@ -2,7 +2,7 @@ package com.arcanesecurity.pixabayapp.model
 
 import com.google.gson.annotations.SerializedName
 
-data class Pixabay(
+data class PixabayImage(
     @SerializedName("total")
     val total : Int,
     @SerializedName("hits")
